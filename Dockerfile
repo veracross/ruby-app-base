@@ -15,6 +15,7 @@ RUN apt-get update -qq
 # https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
 RUN curl -fsSL https://deb.nodesource.com/setup_${node_version}.x | bash -
 RUN apt-get install -y nodejs
+RUN npm install -g yarn@1
 
 # FreeTDS
 # we aren't installing from git, but these instructions are mostly useful
