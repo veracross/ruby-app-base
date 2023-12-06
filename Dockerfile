@@ -26,7 +26,7 @@ RUN apt-get update -qq
 # https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
 ARG node_version
 RUN curl -fsSL https://deb.nodesource.com/setup_${node_version}.x | bash -
-RUN apt-get install -y nodejs git-core
+RUN apt-get install -y nodejs npm git-core
 
 COPY --chown=root --from=tds_builder /home/deploy/tds/bin/* /usr/local/bin/
 COPY --chown=root --from=tds_builder /home/deploy/tds/lib/* /usr/local/lib/
@@ -36,4 +36,3 @@ COPY --chown=root --from=tds_builder /home/deploy/tds/etc/* /etc/freetds/
 
 # clean up after installation of required libraries
 RUN apt-get clean
-
