@@ -33,3 +33,8 @@ RUN curl -fsSL https://github.com/FreeTDS/freetds/archive/refs/tags/v${freetds_v
 # Misc tools
 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
 RUN apt-get install -y --no-install-recommends gpg curl tar jq libasound2
+
+# create app user & home directory
+RUN adduser --uid 55555 --home /home/appuser --disabled-password --gecos "" appuser
+USER appuser
+WORKDIR /home/appuser
