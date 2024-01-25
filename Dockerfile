@@ -33,3 +33,6 @@ RUN curl -fsSL https://github.com/FreeTDS/freetds/archive/refs/tags/v${freetds_v
 # Misc tools
 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
 RUN apt-get install -y --no-install-recommends gpg curl tar jq libasound2
+
+# link future bind mount file(s) to their default location(s)
+RUN ln -s /mount/vault-shared/.vault-token /home/appuser/.vault-token
