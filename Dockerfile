@@ -34,6 +34,10 @@ RUN curl -fsSL https://github.com/FreeTDS/freetds/archive/refs/tags/v${freetds_v
 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
 RUN apt-get install -y --no-install-recommends gpg curl tar jq libasound2
 
+# create app user & home directory
+RUN adduser --uid 55555 --home /home/appuser --disabled-password --gecos "" appuser
+WORKDIR /home/appuser
+
 # link future bind mount file(s) to their default location(s)
 RUN ln -s /mount/vault-shared/.vault-token /home/appuser/.vault-token
 
