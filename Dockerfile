@@ -43,3 +43,8 @@ RUN ln -s /mount/vault-shared/.vault-token /home/appuser/.vault-token
 
 # add configuration files
 COPY --chown=appuser --chmod=0700 .docker/home ./
+COPY --chown=appuser --chmod=0755 .docker/default-cmd.sh ./
+COPY --chown=appuser --chmod=0755 .docker/entrypoint.sh ./app/.docker/
+
+ENTRYPOINT ["/home/appuser/app/.docker/entrypoint.sh"]
+CMD ["/home/appuser/default-cmd.sh"]
