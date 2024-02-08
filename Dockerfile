@@ -40,6 +40,7 @@ WORKDIR /home/appuser
 
 # link future bind mount file(s) to their default location(s)
 RUN ln -s /mount/vault-shared/.vault-token /home/appuser/.vault-token
+RUN ln -s /mount/vault-shared/.consul-token /home/appuser/.consul-token
 
 # add configuration files
 COPY --chown=appuser --chmod=0700 .docker/home ./
