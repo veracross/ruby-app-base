@@ -41,10 +41,14 @@ COPY --chown=root --from=freetds_builder /home/deploy/freetds/etc/* /etc/freetds
 # Node.js and PostgreSQL for Clubhouse
 # https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
 ARG node_version
-RUN apt-get update -qq && apt-get install -y curl libpq-dev gpg wget tar jq libasound2 xvfb unzip git make g++ xz-utils
+RUN apt-get update -qq && apt-get install -y curl libpq-dev gpg wget tar jq libasound2 xvfb unzip git make g++  \
+    xz-utils libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcairo2 libcups2 libdbus-1-3 libgbm1 libglib2.0-0  \
+    libgtk-4-1 libnspr4 libnss3 libpango-1.0-0 libu2f-udev libxcomposite1 libxkbcommon0 libxrandr2 xdg-utils && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean autoclean
 RUN curl -fsSL https://deb.nodesource.com/setup_${node_version}.x | bash - && \
     apt-get install -y nodejs && \
-    apt-mark manual nodejs libpq-dev xvfb unzip make g++ && \
+    apt-mark manual nodejs libpq-dev make g++ && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean autoclean
 
