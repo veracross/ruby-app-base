@@ -44,7 +44,7 @@ ARG node_version
 RUN apt-get update -qq && apt-get install -y curl libpq-dev gpg wget tar jq libasound2 xvfb unzip git make g++ xz-utils
 RUN curl -fsSL https://deb.nodesource.com/setup_${node_version}.x | bash - && \
     apt-get install -y nodejs && \
-    apt-mark manual nodejs libpq-dev make g++ && \
+    apt-mark manual nodejs libpq-dev xvfb unzip make g++ && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean autoclean
 
