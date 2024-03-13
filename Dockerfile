@@ -39,6 +39,10 @@ RUN apt-get install -y --no-install-recommends gpg curl tar jq libasound2
 RUN adduser --uid 55555 --home /home/appuser --disabled-password --gecos "" appuser
 WORKDIR /home/appuser
 
+USER appuser
+RUN gem install bundler:2.4.22
+USER root
+
 # link future bind mount file(s) to their default location(s)
 RUN ln -s /mount/vault-shared/.vault-token /home/appuser/.vault-token
 RUN ln -s /mount/vault-shared/.consul-token /home/appuser/.consul-token
