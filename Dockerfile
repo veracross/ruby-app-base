@@ -44,4 +44,3 @@ RUN ln -s /mount/vault-shared/.consul-token /home/appuser/.consul-token
 
 # add configuration files
 COPY --chown=appuser --chmod=0700 .docker/home ./
-RUN ln -s /home/appuser/.bundle /root/.bundle
