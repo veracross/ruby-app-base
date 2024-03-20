@@ -2,37 +2,27 @@
 
 ARG ruby_version=2.7
 ARG node_version=14
-ARG freetds_version=1.3.9
+ARG freetds_version=1.3.10
 
-FROM ruby:${ruby_version}
+FROM ruby:${ruby_version}-alpine
 
 ARG node_version
 ARG freetds_version
 
-RUN apt-get update -qq
+RUN apk update
+RUN apk add --no-cache curl build-base postgresql-dev
 
 # Node.js
-# https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
-RUN curl -fsSL https://deb.nodesource.com/setup_${node_version}.x | bash -
-RUN apt-get install -y nodejs
+RUN curl -fsSL https://unofficial-builds.nodejs.org/download/release/v14.4.0/node-v14.4.0-linux-x64-musl.tar.xz -o /tmp/node.tar.xz && \
+    tar -xvf /tmp/node.tar.xz -C /usr/local --strip-components=1 && \
+    rm /tmp/node.tar.xz
 
 # FreeTDS
-# we aren't installing from git, but these instructions are mostly useful
-# https://github.com/FreeTDS/freetds/blob/master/INSTALL.GIT.md
-# undeclared requirements: https://github.com/FreeTDS/freetds/issues/172, gperf, etc
-RUN apt-get install -y --no-install-recommends automake autoconf libtool make gcc perl gettext gperf git
-
-RUN curl -fsSL https://github.com/FreeTDS/freetds/archive/refs/tags/v${freetds_version}.tar.gz -o freetds-${freetds_version}.tar.gz && \
-    tar -xzf freetds-${freetds_version}.tar.gz && \
-    cd freetds-${freetds_version} && \
-    git init && git config user.email "n/a" && git config user.name "n/a" && touch blank && git add blank && git commit -m "a commit" && \
-    ./autogen.sh --prefix=/usr/local --with-tdsver=7.3 && \
-    make && \
-    make install
+RUN apk add --no-cache freetds-dev=$freetds_version-r0
 
 # Misc tools
 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
-RUN apt-get install -y --no-install-recommends gpg curl tar jq libasound2
+RUN apk add --no-cache gpg jq
 
 # create app user & home directory
 RUN adduser --uid 55555 --home /home/appuser --disabled-password --gecos "" appuser
