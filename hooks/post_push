@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+if [[ "$PUSH_COMMIT_TIMESTAMP_TAG" == "true" ]]; then
+    COMMIT_TIMESTAMP_TAG="$SOURCE_BRANCH-$SOURCE_COMMIT-$(date +%Y%m%d%H%M%S)"
+
+    docker tag $IMAGE_NAME $DOCKER_REPO:$COMMIT_TIMESTAMP_TAG
+    docker push $DOCKER_REPO:$COMMIT_TIMESTAMP_TAG
+fi
