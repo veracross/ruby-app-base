@@ -9,7 +9,6 @@ FROM ruby:${ruby_version}-alpine
 ARG node_version
 ARG freetds_version
 
-RUN apk update
 RUN apk add --no-cache curl build-base postgresql-dev
 
 # Node.js
