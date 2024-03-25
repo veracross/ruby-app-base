@@ -3,36 +3,54 @@
 ARG ruby_version=2.7
 ARG node_version=14
 ARG freetds_version=1.3.9
+ARG tag_variant=-slim-bullseye
 
-FROM ruby:${ruby_version}
+FROM ruby:${ruby_version}${tag_variant} as freetds_builder
 
-ARG node_version
-ARG freetds_version
-
-RUN apt-get update -qq
-
-# Node.js
-# https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
-RUN curl -fsSL https://deb.nodesource.com/setup_${node_version}.x | bash -
-RUN apt-get install -y nodejs
+RUN mkdir -p /home/deploy/freetds
 
 # FreeTDS
 # we aren't installing from git, but these instructions are mostly useful
 # https://github.com/FreeTDS/freetds/blob/master/INSTALL.GIT.md
 # undeclared requirements: https://github.com/FreeTDS/freetds/issues/172, gperf, etc
-RUN apt-get install -y --no-install-recommends automake autoconf libtool make gcc perl gettext gperf git
-
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends autoconf automake bzip2 file g++ gcc libbz2-dev libc6-dev  \
+    libmagickcore-dev libtool libtool-bin autogen libtool make gcc perl gettext gperf git gpg curl tar \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean autoclean && \
+    apt-get autoremove -y
+ARG freetds_version
 RUN curl -fsSL https://github.com/FreeTDS/freetds/archive/refs/tags/v${freetds_version}.tar.gz -o freetds-${freetds_version}.tar.gz && \
     tar -xzf freetds-${freetds_version}.tar.gz && \
     cd freetds-${freetds_version} && \
     git init && git config user.email "n/a" && git config user.name "n/a" && touch blank && git add blank && git commit -m "a commit" && \
-    ./autogen.sh --prefix=/usr/local --with-tdsver=7.3 && \
+    ./autogen.sh --prefix=/home/deploy/freetds/ --with-tdsver=7.3 && \
     make && \
     make install
 
-# Misc tools
-# https://circleci.com/developer/orbs/orb/circleci/browser-tools
-RUN apt-get install -y --no-install-recommends gpg curl tar jq libasound2
+FROM ruby:${ruby_version}${tag_variant} as final
+
+# copying the compiled freetds libraries from the builder image
+COPY --chown=root --from=freetds_builder /home/deploy/freetds/bin /usr/local/bin
+COPY --chown=root --from=freetds_builder /home/deploy/freetds/lib /usr/local/lib
+COPY --chown=root --from=freetds_builder /home/deploy/freetds/include /usr/local/include
+COPY --chown=root --from=freetds_builder /home/deploy/freetds/share /usr/local/share
+COPY --chown=root --from=freetds_builder /home/deploy/freetds/etc/* /etc/freetds/
+
+# Node.js and PostgreSQL for Clubhouse
+# https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
+ARG node_version
+RUN apt-get update -qq && apt-get install -y curl libpq-dev git make g++ git && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean autoclean
+
+RUN curl -fsSL https://deb.nodesource.com/setup_${node_version}.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-mark manual nodejs libpq-dev make g++ && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /etc/apt/sources.list.d/* && \
+    apt-get clean autoclean
 
 # create app user & home directory
 RUN adduser --uid 55555 --home /home/appuser --disabled-password --gecos "" appuser
@@ -48,3 +66,4 @@ RUN ln -s /mount/vault-shared/.consul-token /home/appuser/.consul-token
 
 # add configuration files
 COPY --chown=appuser --chmod=0700 .docker/home ./
+COPY --chown=appuser --chmod=0700 .docker/chrome_install.sh ./chrome_install.sh
