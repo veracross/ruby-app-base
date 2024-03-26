@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG ruby_version=3.2
-ARG node_version=18
+ARG node_version=20
 ARG freetds_version=1.3.9
 
 FROM ruby:${ruby_version}
